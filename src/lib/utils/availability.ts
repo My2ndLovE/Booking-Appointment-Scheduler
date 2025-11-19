@@ -2,6 +2,7 @@ import { supabase } from '$lib/supabase/client';
 import type { WorkingHours, TimeSlot } from '$lib/types/staff';
 import type { Booking } from '$lib/types/booking';
 import { getDayName, timeToMinutes, minutesToTime, format } from './date';
+import { Errors, fromSupabaseError, logError } from '$lib/types/errors';
 
 /**
  * Generate time slots for a given time range
@@ -83,9 +84,13 @@ export async function getAvailableSlots(
 			.eq('id', serviceId)
 			.single();
 
-		if (serviceError || !service) {
-			console.error('Service not found:', serviceError);
-			return [];
+		if (serviceError) {
+			logError(serviceError, { context: 'getAvailableSlots - service fetch', serviceId });
+			throw fromSupabaseError(serviceError);
+		}
+
+		if (!service) {
+			throw Errors.notFound('Service', serviceId);
 		}
 
 		// 2. Get staff working hours
@@ -95,15 +100,19 @@ export async function getAvailableSlots(
 			.eq('id', staffId)
 			.single();
 
-		if (staffError || !staff) {
-			console.error('Staff not found:', staffError);
-			return [];
+		if (staffError) {
+			logError(staffError, { context: 'getAvailableSlots - staff fetch', staffId });
+			throw fromSupabaseError(staffError);
+		}
+
+		if (!staff) {
+			throw Errors.notFound('Staff member', staffId);
 		}
 
 		const workingHours = staff.working_hours as WorkingHours;
 		const dayHours = getWorkingHoursForDay(workingHours, date);
 
-		// No working hours for this day
+		// No working hours for this day - this is expected, return empty array
 		if (!dayHours || dayHours.length === 0) {
 			return [];
 		}
@@ -118,8 +127,8 @@ export async function getAvailableSlots(
 			.in('status', ['pending', 'confirmed']);
 
 		if (bookingsError) {
-			console.error('Error fetching bookings:', bookingsError);
-			return [];
+			logError(bookingsError, { context: 'getAvailableSlots - bookings fetch', staffId, dateStr });
+			throw fromSupabaseError(bookingsError);
 		}
 
 		// 4. Generate all possible slots
@@ -150,13 +159,15 @@ export async function getAvailableSlots(
 
 		return availableSlots.sort();
 	} catch (error) {
-		console.error('Error calculating availability:', error);
-		return [];
+		// Log the error and re-throw for the caller to handle
+		logError(error, { context: 'getAvailableSlots', staffId, serviceId, date });
+		throw error;
 	}
 }
 
 /**
  * Check if a specific time slot is available
+ * @throws {AppError} if database query fails
  */
 export async function isSlotAvailable(
 	staffId: string,
@@ -174,8 +185,8 @@ export async function isSlotAvailable(
 		.in('status', ['pending', 'confirmed']);
 
 	if (error) {
-		console.error('Error checking slot availability:', error);
-		return false;
+		logError(error, { context: 'isSlotAvailable', staffId, dateStr, startTime, endTime });
+		throw fromSupabaseError(error);
 	}
 
 	const hasConflict = bookings?.some((booking) =>
