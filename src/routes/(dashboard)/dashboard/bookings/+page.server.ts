@@ -1,6 +1,6 @@
-import type { PageLoad } from './$types';
+import type { PageServerLoad } from './$types';
 
-export const load: PageLoad = async ({ locals: { supabase }, parent, url }) => {
+export const load: PageServerLoad = async ({ locals: { supabase }, parent, url }) => {
 	const { profile } = await parent();
 
 	if (!profile?.organization_id) {

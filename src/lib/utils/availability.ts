@@ -48,7 +48,7 @@ export function getWorkingHoursForDay(
 	workingHours: WorkingHours,
 	date: Date
 ): TimeSlot[] | null {
-	const dayName = getDayName(date);
+	const dayName = getDayName(date) as keyof Omit<WorkingHours, 'exceptions'>;
 	const dateStr = format(date, 'yyyy-MM-dd');
 
 	// Check for exceptions first
@@ -141,7 +141,7 @@ export async function getAvailableSlots(
 			);
 
 			// Check if this slot conflicts with any existing booking
-			const hasConflict = bookings?.some((booking: Booking) =>
+			const hasConflict = bookings?.some((booking) =>
 				slotsOverlap(slotStart, slotEnd, booking.start_time, booking.end_time)
 			);
 
@@ -178,7 +178,7 @@ export async function isSlotAvailable(
 		return false;
 	}
 
-	const hasConflict = bookings?.some((booking: Booking) =>
+	const hasConflict = bookings?.some((booking) =>
 		slotsOverlap(startTime, endTime, booking.start_time, booking.end_time)
 	);
 

@@ -18,5 +18,9 @@ export interface UserWithOrganization extends User {
 		id: string;
 		name: string;
 		slug: string;
+		email: string;
+		timezone: string;
+		business_hours?: any;
+		settings?: any;
 	};
 }

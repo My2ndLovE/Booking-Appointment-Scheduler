@@ -2,6 +2,12 @@ import {
 	format,
 	parseISO,
 	addMinutes,
+	addWeeks,
+	subWeeks,
+	addMonths,
+	subMonths,
+	addDays,
+	subDays,
 	startOfDay,
 	endOfDay,
 	startOfWeek,
@@ -10,16 +16,25 @@ import {
 	endOfMonth,
 	eachDayOfInterval,
 	isSameDay,
+	isSameMonth,
 	isToday,
 	isPast,
 	isFuture,
-	differenceInDays
+	isWithinInterval,
+	differenceInDays,
+	differenceInMinutes
 } from 'date-fns';
 
 export {
 	format,
 	parseISO,
 	addMinutes,
+	addWeeks,
+	subWeeks,
+	addMonths,
+	subMonths,
+	addDays,
+	subDays,
 	startOfDay,
 	endOfDay,
 	startOfWeek,
@@ -28,10 +43,13 @@ export {
 	endOfMonth,
 	eachDayOfInterval,
 	isSameDay,
+	isSameMonth,
 	isToday,
 	isPast,
 	isFuture,
-	differenceInDays
+	isWithinInterval,
+	differenceInDays,
+	differenceInMinutes
 };
 
 /**

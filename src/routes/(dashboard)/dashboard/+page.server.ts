@@ -1,7 +1,7 @@
-import type { PageLoad } from './$types';
+import type { PageServerLoad } from './$types';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 
-export const load: PageLoad = async ({ locals: { supabase }, parent }) => {
+export const load: PageServerLoad = async ({ locals: { supabase }, parent }) => {
 	const { profile } = await parent();
 
 	if (!profile?.organization_id) {
@@ -51,7 +51,7 @@ export const load: PageLoad = async ({ locals: { supabase }, parent }) => {
 		.gte('booking_date', monthStart)
 		.lte('booking_date', monthEnd);
 
-	const monthRevenue = paidBookings?.reduce((sum, b) => sum + Number(b.price), 0) || 0;
+	const monthRevenue = paidBookings?.reduce((sum: number, b) => sum + Number(b.price), 0) || 0;
 
 	// Get recent bookings
 	const { data: recentBookings } = await supabase
